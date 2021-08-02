@@ -34,8 +34,15 @@ public class ActivityLogin extends AppCompatActivity {
         editEmailLogin = findViewById(R.id.editEmailLogin);
         editSenhaLogin = findViewById(R.id.editSenhaLogin);
         //autenticacao.signOut();
+    }
 
-        verificarUsuarioLogado();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //verifica se o usuario esta logado
+        if (autenticacao.getCurrentUser() != null){
+            abrirTelaPrincipal();
+        }
     }
 
     public void logarUsuario (Usuario usuario){
@@ -110,11 +117,5 @@ public class ActivityLogin extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void verificarUsuarioLogado () {
-        //verifica se o usuario esta logado
-        if (autenticacao.getCurrentUser() != null){
-            abrirTelaPrincipal();
-        }
-    }
 }
 

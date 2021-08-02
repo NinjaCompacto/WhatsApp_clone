@@ -1,15 +1,64 @@
 package com.example.whatsapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
+import com.google.firebase.auth.FirebaseAuth;
+
+import configfirebase.ConfiguraçãoFirebase;
 
 public class MainActivity extends AppCompatActivity {
 
+    FirebaseAuth autenticacao = ConfiguraçãoFirebase.getAuth();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //ToolBar
+        Toolbar toolbar = findViewById(R.id.toolbarPrincipal);
+        toolbar.setTitle("WhatsApp");
+        setSupportActionBar(toolbar);
+    }
+
+    //menu da toolbar
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        //inflar o menu da toolbar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+       // caso de botão de sair selecionado
+        switch (item.getItemId()){
+           case R.id.menuSair:
+               logOutUsuario();
+               //retorna para tela de login ( tela principal )
+               finish();
+           break;
+       }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void logOutUsuario (){
+        //deloga o usuario da conta
+        try {
+            autenticacao.signOut();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }
