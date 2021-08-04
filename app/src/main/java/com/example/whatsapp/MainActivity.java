@@ -5,10 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.example.whatsapp.Fragments.ContatosFragment;
 import com.example.whatsapp.Fragments.ConversasFragment;
@@ -66,7 +68,10 @@ public class MainActivity extends AppCompatActivity {
                logOutUsuario();
                //retorna para tela de login ( tela principal )
                finish();
-           break;
+                 break;
+            case R.id.menuConfiguracoes:
+                openConfigScreen();
+                break;
        }
         return super.onOptionsItemSelected(item);
     }
@@ -79,5 +84,10 @@ public class MainActivity extends AppCompatActivity {
         catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public void openConfigScreen () {
+        Intent intent = new Intent(MainActivity.this,ConfiguracoesActivity.class);
+        startActivity(intent);
     }
 }
