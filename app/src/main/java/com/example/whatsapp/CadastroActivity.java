@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.whatsapp.Helper.Base64Custom;
 import com.example.whatsapp.Model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -43,6 +44,8 @@ public class CadastroActivity extends AppCompatActivity {
                 if(task.isSuccessful()){
                     Toast.makeText(CadastroActivity.this,"Usuário cadastrado!",Toast.LENGTH_LONG).show();
                     finish();
+                    salvarDados(usuario);
+
                 }
                 else {
                     String exececao ="";
@@ -100,6 +103,20 @@ public class CadastroActivity extends AppCompatActivity {
             Toast.makeText(CadastroActivity.this,"Preencha o nome!",Toast.LENGTH_LONG).show();
         }
 
+    }
+
+    public void salvarDados (Usuario usuario){
+        try{
+            //codifica o email do usuario para base64
+            String identificadorusuario = Base64Custom.codificarBase64(usuario.getEmail());
+            //atribui valor para o id
+            usuario.setId(identificadorusuario);
+            //salva os dados no firebase
+            usuario.salvar();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }
