@@ -16,11 +16,21 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
+import com.example.whatsapp.Helper.Base64Custom;
 import com.example.whatsapp.Helper.Permissao;
+import com.example.whatsapp.Helper.UsuarioFirebase;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 
+import configfirebase.ConfiguraçãoFirebase;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ConfiguracoesActivity extends AppCompatActivity {
@@ -32,7 +42,8 @@ public class ConfiguracoesActivity extends AppCompatActivity {
 
     private ImageButton imagebuttonGaleria,imagebuttonCamera;
     private CircleImageView circleImageView;
-
+    private StorageReference storageReference;
+    private String idusuairo;
 
     private static final int SELECAO_CAMERA = 100;
     private static final int SELECAO_GALERIA = 200;
@@ -42,6 +53,9 @@ public class ConfiguracoesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configuracoes);
 
+        //configurações iniciais
+        storageReference = ConfiguraçãoFirebase.getStorage();
+        idusuairo = UsuarioFirebase.getIdUsuario();
         //setando ID
         imagebuttonCamera = findViewById(R.id.imageButtonCamera);
         imagebuttonGaleria = findViewById(R.id.imageButtonGaleria);
@@ -101,6 +115,31 @@ public class ConfiguracoesActivity extends AppCompatActivity {
 
                 if (imagem != null){
                     circleImageView.setImageBitmap(imagem);
+
+                    //recuperar dados da imagem para o firebase
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    imagem.compress(Bitmap.CompressFormat.JPEG,70,baos);
+                    byte[] dadosimagem = baos.toByteArray();
+
+                    //salvar imagem no firebase
+                    StorageReference imagemref = storageReference
+                            .child("imagens")
+                            .child("perfil")
+                            .child(idusuairo)
+                            .child("perfil.jpeg");
+
+                    UploadTask uploadTask = imagemref.putBytes(dadosimagem);
+                    uploadTask.addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(Exception e) {
+                            Toast.makeText(ConfiguracoesActivity.this,"Erro ao fazer upload",Toast.LENGTH_LONG).show();
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Toast.makeText(ConfiguracoesActivity.this,"Sucesso ao fazer Upload",Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
 
             }catch (Exception e){

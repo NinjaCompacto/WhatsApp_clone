@@ -118,5 +118,4 @@ public class CadastroActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
 }
