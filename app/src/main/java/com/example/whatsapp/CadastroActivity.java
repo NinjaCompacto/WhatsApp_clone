@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.whatsapp.Helper.Base64Custom;
+import com.example.whatsapp.Helper.UsuarioFirebase;
 import com.example.whatsapp.Model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -45,6 +46,7 @@ public class CadastroActivity extends AppCompatActivity {
                     Toast.makeText(CadastroActivity.this,"Usuário cadastrado!",Toast.LENGTH_LONG).show();
                     finish();
                     salvarDados(usuario);
+                    UsuarioFirebase.atualizarNomeUsuario(usuario.getNome());
 
                 }
                 else {

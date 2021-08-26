@@ -15,15 +15,20 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.whatsapp.Helper.Base64Custom;
 import com.example.whatsapp.Helper.Permissao;
 import com.example.whatsapp.Helper.UsuarioFirebase;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -40,6 +45,7 @@ public class ConfiguracoesActivity extends AppCompatActivity {
             Manifest.permission.CAMERA
     };
 
+    private EditText editTextTextPersonName;
     private ImageButton imagebuttonGaleria,imagebuttonCamera;
     private CircleImageView circleImageView;
     private StorageReference storageReference;
@@ -56,10 +62,12 @@ public class ConfiguracoesActivity extends AppCompatActivity {
         //configurações iniciais
         storageReference = ConfiguraçãoFirebase.getStorage();
         idusuairo = UsuarioFirebase.getIdUsuario();
+
         //setando ID
         imagebuttonCamera = findViewById(R.id.imageButtonCamera);
         imagebuttonGaleria = findViewById(R.id.imageButtonGaleria);
         circleImageView = findViewById(R.id.circleImageView);
+        editTextTextPersonName = findViewById(R.id.editTextTextPersonName);
 
         //excultando permissões
         Permissao.validarPermissoes(permissoesNecessarias, this,1);
@@ -71,6 +79,24 @@ public class ConfiguracoesActivity extends AppCompatActivity {
 
         //adiciona botão de voltar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        //recuperando usuario atual
+        FirebaseUser usuario = UsuarioFirebase.getUsuarioatual();
+        Uri url = usuario.getPhotoUrl();
+
+        //verificação se já tem imagem, se não houver estão sera configurada a imagem padrão
+        if (url != null){
+            //faz dowload e substitui a imagem
+            Glide.with(ConfiguracoesActivity.this).load(url).into(circleImageView);
+        }else {
+            circleImageView.setImageResource(R.drawable.padrao);
+        }
+        String nome = usuario.getDisplayName();
+        if (nome !=  null){
+            editTextTextPersonName.setText(nome);
+        }else{
+            editTextTextPersonName.setText("Nome");
+        }
 
         imagebuttonCamera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,7 +148,7 @@ public class ConfiguracoesActivity extends AppCompatActivity {
                     byte[] dadosimagem = baos.toByteArray();
 
                     //salvar imagem no firebase
-                    StorageReference imagemref = storageReference
+                    final StorageReference  imagemref = storageReference
                             .child("imagens")
                             .child("perfil")
                             .child(idusuairo)
@@ -138,6 +164,14 @@ public class ConfiguracoesActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             Toast.makeText(ConfiguracoesActivity.this,"Sucesso ao fazer Upload",Toast.LENGTH_LONG).show();
+                            //recupera a url da imagem que foi upada para o Firebase
+                            imagemref.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(Task<Uri> task) {
+                                    Uri url = task.getResult();
+                                    atualizarFotoUsuario(url);
+                                }
+                            });
                         }
                     });
                 }
@@ -146,6 +180,10 @@ public class ConfiguracoesActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void atualizarFotoUsuario (Uri url){
+        UsuarioFirebase.atualizaFotoUsuario(url);
     }
 
     @Override
@@ -159,7 +197,7 @@ public class ConfiguracoesActivity extends AppCompatActivity {
         }
     }
 
-        private void alertaValidacaoPermissao(){
+    private void alertaValidacaoPermissao(){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Permissões Negadas");
             builder.setMessage("Para utilizar o APP é preciso aceitar todas as permissões");
