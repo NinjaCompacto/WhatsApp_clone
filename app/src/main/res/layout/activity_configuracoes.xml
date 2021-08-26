@@ -59,9 +59,10 @@
             android:text="Name" />
 
         <ImageView
-            android:id="@+id/imageView2"
+            android:id="@+id/ImagemSalvarNome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="atualizarNomeUsuario"
             app:srcCompat="@drawable/ic_baseline_edit_24" />
     </LinearLayout>
 

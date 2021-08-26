@@ -1,7 +1,6 @@
 package com.example.whatsapp;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -17,23 +16,22 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.example.whatsapp.Helper.Base64Custom;
 import com.example.whatsapp.Helper.Permissao;
 import com.example.whatsapp.Helper.UsuarioFirebase;
+import com.example.whatsapp.Model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
-import java.net.URI;
 
 import configfirebase.ConfiguraçãoFirebase;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -45,11 +43,13 @@ public class ConfiguracoesActivity extends AppCompatActivity {
             Manifest.permission.CAMERA
     };
 
+    private ImageView imageSalvarNome;
     private EditText editTextTextPersonName;
     private ImageButton imagebuttonGaleria,imagebuttonCamera;
     private CircleImageView circleImageView;
     private StorageReference storageReference;
     private String idusuairo;
+    private Usuario usuariologado;
 
     private static final int SELECAO_CAMERA = 100;
     private static final int SELECAO_GALERIA = 200;
@@ -62,12 +62,14 @@ public class ConfiguracoesActivity extends AppCompatActivity {
         //configurações iniciais
         storageReference = ConfiguraçãoFirebase.getStorage();
         idusuairo = UsuarioFirebase.getIdUsuario();
+        usuariologado = UsuarioFirebase.getUsuarioLogado();
 
         //setando ID
         imagebuttonCamera = findViewById(R.id.imageButtonCamera);
         imagebuttonGaleria = findViewById(R.id.imageButtonGaleria);
         circleImageView = findViewById(R.id.circleImageView);
         editTextTextPersonName = findViewById(R.id.editTextTextPersonName);
+        imageSalvarNome = findViewById(R.id.ImagemSalvarNome);
 
         //excultando permissões
         Permissao.validarPermissoes(permissoesNecessarias, this,1);
@@ -92,6 +94,7 @@ public class ConfiguracoesActivity extends AppCompatActivity {
             circleImageView.setImageResource(R.drawable.padrao);
         }
         String nome = usuario.getDisplayName();
+
         if (nome !=  null){
             editTextTextPersonName.setText(nome);
         }else{
@@ -184,7 +187,54 @@ public class ConfiguracoesActivity extends AppCompatActivity {
 
     public void atualizarFotoUsuario (Uri url){
         UsuarioFirebase.atualizaFotoUsuario(url);
+        usuariologado.setFoto(url.toString());
+        usuariologado.atualizar();
     }
+
+    //atualiza nome de usuario no perfil do firebase
+    public void atualizarNomeUsuario (View view){
+
+        String nomeatual = editTextTextPersonName.getText().toString();
+        boolean retorno = UsuarioFirebase.atualizarNomeUsuario(nomeatual);
+       if (!nomeatual.isEmpty()) {
+           if (retorno == true) {
+               Toast.makeText(ConfiguracoesActivity.this, "Sucesso ao atualizar nome !", Toast.LENGTH_SHORT).show();
+               finish();
+               usuariologado.setNome(nomeatual);
+               usuariologado.atualizar();
+               //atualizarNomeBanco(nomeatual);
+           }
+           else {
+               Toast.makeText(ConfiguracoesActivity.this, "Erro ao atualizar nome !", Toast.LENGTH_SHORT).show();
+           }
+       }
+       else{
+           Toast.makeText(ConfiguracoesActivity.this, "Preencha o Nome !", Toast.LENGTH_SHORT).show();
+       }
+
+
+    }
+
+    /*
+    //atualiza o nome no banco de dados assim que é atualizado
+    private void atualizarNomeBanco(String nome) {
+
+        String nomeatual = nome;
+        FirebaseUser user = UsuarioFirebase.getUsuarioatual();
+        String email = user.getEmail();
+        String emailcodificado = Base64Custom.codificarBase64(email);
+        DatabaseReference databaseReference = ConfiguraçãoFirebase.getDatabaseReference();
+        DatabaseReference usuario = databaseReference.child("usuarios").child(emailcodificado).child("nome");
+        usuario.setValue(nomeatual).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(Task<Void> task) {
+                if (!task.isSuccessful()){
+                    ToastMaker.makeToast(ConfiguracoesActivity.this,"Erro ao atualizar banco de dados");
+                }
+            }
+        });
+
+    }*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull  String[] permissions, @NonNull  int[] grantResults) {

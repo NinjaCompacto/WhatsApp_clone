@@ -2,10 +2,7 @@ package com.example.whatsapp.Helper;
 
 import android.net.Uri;
 import android.util.Log;
-
-import androidx.annotation.NonNull;
-
-import com.example.whatsapp.ConfiguracoesActivity;
+import com.example.whatsapp.Model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -67,4 +64,21 @@ public class UsuarioFirebase {
             return false;
         }
     }
+
+    public static Usuario getUsuarioLogado (){
+        FirebaseUser  firebaseUser = getUsuarioatual();
+        Usuario usuario= new Usuario();
+        usuario.setEmail(firebaseUser.getEmail());
+        usuario.setNome(firebaseUser.getDisplayName());
+
+        if (firebaseUser.getPhotoUrl() == null){
+                usuario.setFoto("Padrão");
+        }
+        else{
+                usuario.setFoto(firebaseUser.getPhotoUrl().toString());
+        }
+
+        return usuario;
+    }
+
 }
