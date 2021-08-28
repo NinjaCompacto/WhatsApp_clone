@@ -2,13 +2,26 @@ package com.example.whatsapp.Fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.whatsapp.Model.Usuario;
 import com.example.whatsapp.R;
+import com.example.whatsapp.adapter.ContatosAdapter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+
+import configfirebase.ConfiguraçãoFirebase;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,6 +29,12 @@ import com.example.whatsapp.R;
  * create an instance of this fragment.
  */
 public class ContatosFragment extends Fragment {
+
+    private RecyclerView recyclerViewListaContatos;
+    private ContatosAdapter adapter;
+    private ArrayList<Usuario> listacontatos = new ArrayList<>();
+    private DatabaseReference usuarioref;
+    private ValueEventListener valueEventListenerContatos;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -58,9 +77,51 @@ public class ContatosFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        recuperarContatos();
+    }
+
+    @Override
+    public void onStop() {
+         super.onStop();
+         usuarioref.removeEventListener(valueEventListenerContatos);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_contatos, container, false);
+        View view =inflater.inflate(R.layout.fragment_contatos, container, false);
+        recyclerViewListaContatos = view.findViewById(R.id.recyclerListaContatos);
+        usuarioref = ConfiguraçãoFirebase.getDatabaseReference().child("usuarios");
+
+        //configurando adpter
+        adapter = new ContatosAdapter(listacontatos,getActivity());
+        //configurando recycler
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        recyclerViewListaContatos.setLayoutManager(layoutManager);
+        recyclerViewListaContatos.setHasFixedSize(true);
+        recyclerViewListaContatos.setAdapter(adapter);
+        return view;
+    }
+
+    public void recuperarContatos (){
+
+       valueEventListenerContatos = usuarioref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot dados: snapshot.getChildren()){
+                    Usuario usuario = dados .getValue(Usuario.class);
+                    listacontatos.add(usuario);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+
+            }
+        });
     }
 }
