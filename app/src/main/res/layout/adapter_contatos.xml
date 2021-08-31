@@ -3,8 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="7dp">
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingTop="6dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="6dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageViewContato"
@@ -34,4 +42,8 @@
             android:layout_height="wrap_content"
             android:text="email" />
     </LinearLayout>
+    </LinearLayout>
+
+    <include layout="@layout/divisor"/>
+
 </LinearLayout>
