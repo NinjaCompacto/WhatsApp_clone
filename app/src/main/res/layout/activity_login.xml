@@ -57,7 +57,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/digite_sua_senha"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            tools:ignore="TouchTargetSizeCheck" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
@@ -83,6 +84,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:minHeight="48dp"
         android:onClick="abrirTelaCadastro"
         android:text="@string/cadastro_text"
         android:textColor="@android:color/white"
